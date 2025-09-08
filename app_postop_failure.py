@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 
 st.set_page_config(page_title="Postop Respiratory Failure", layout="wide")
-st.title("Postoperative Respiratory Failure — Predict")
+st.title("Postoperative Respiratory Failure — Prediction")
 
 # 固定参数
 CSV_PATH   = "train_top.csv"
@@ -16,7 +16,7 @@ LABEL_MAP  = {"normal": 0, "rfpe": 1}
 THRESHOLD  = 0.5   # 固定阈值
 
 # ---------------- Load & Train ----------------
-@st.cache_resource(show_spinner=True)
+@st.cache_resource(show_spinner=False)
 def load_and_train():
     df = pd.read_csv(CSV_PATH, index_col=0)
     X = df.drop(columns=[TARGET_COL])
@@ -33,7 +33,6 @@ def load_and_train():
 
 try:
     model, feature_names, default_vals = load_and_train()
-    st.success("Model trained on train_top.csv ✔️")
 except Exception as e:
     st.error(f"Training failed: {e}")
     st.stop()
@@ -49,7 +48,6 @@ for i, f in enumerate(feature_names):
     with col:
         dv = float(default_vals.get(f, 0.0))
         vals[f] = st.number_input(f, value=float(dv), format="%.6f")
-    # 每 5 个变量换一行
     if (i + 1) % 5 == 0 and (i + 1) < len(feature_names):
         cols = st.columns(5)
 
@@ -57,5 +55,5 @@ if st.button("Predict"):
     X_new = pd.DataFrame([vals], columns=feature_names)
     proba = float(model.predict_proba(X_new)[:, 1][0])
     pred  = int(proba >= THRESHOLD)
-    st.success(f"Probability of RFPE: {proba:.3f}")
-    st.info(f"Predicted label: {'Positive (RFPE)' if pred==1 else 'Negative (Normal)'}")
+    st.markdown(f"**Probability of RFPE:** `{proba:.3f}`")
+    st.markdown(f"**Predicted label:** {'🟥 Positive (RFPE)' if pred==1 else '🟩 Negative (Normal)'}")
