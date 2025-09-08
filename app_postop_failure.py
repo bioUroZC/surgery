@@ -29,7 +29,7 @@ st.markdown(STYLES, unsafe_allow_html=True)
 # ---------------- Fixed config ----------------
 DATASETS = {
     "Occurrence (RFPE)": {
-        "csv": "train_occurence.csv",
+        "csv": "train_occurence.csv",   # your filename
         "target": "group",
         "label_map": {"normal": 0, "rfpe": 1},
         "positive_name": "Respiratory Failure (RFPE)"
@@ -47,6 +47,7 @@ DATASETS = {
         "positive_name": "90-day mortality"
     },
 }
+DEFAULT_TASK = list(DATASETS.keys())[0]
 
 # ---------------- Train (cached per task) ----------------
 @st.cache_resource(show_spinner=False)
@@ -60,6 +61,7 @@ def train_for_task(task_key: str):
     X = df.drop(columns=[cfg["target"]])
     y_raw = df[cfg["target"]]
 
+    # unify to 0/1
     if y_raw.dtype.kind in "iuf":
         y = (y_raw > 0).astype(int)
     else:
@@ -90,11 +92,15 @@ st.markdown(
     "<span class='subtle'>Single-page, cloud-trained Random Forest</span></div>", unsafe_allow_html=True
 )
 
-# ---------------- Task selector ----------------
-task = st.segmented_control("Select task", list(DATASETS.keys()), selection_mode="single")
+# ---------------- Task selector (radio for compatibility) ----------------
+task = st.radio("Select task", list(DATASETS.keys()), index=0, horizontal=True)
+# 保险起见：如果返回了意外值，回退到默认
+if task not in DATASETS:
+    task = DEFAULT_TASK
 cfg = DATASETS[task]
 pos_name = cfg["positive_name"]
 
+# Train silently (cached)
 try:
     model, feature_names, default_vals = train_for_task(task)
 except Exception as e:
@@ -121,7 +127,7 @@ with c3:
 with c4:
     predict_clicked = st.button("🚀 Predict", type="primary", use_container_width=True)
 
-# ---------------- Inputs (5 columns per row, in a card) ----------------
+# ---------------- Inputs (5 columns per row) ----------------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 cols = st.columns(5)
 vals = {}
@@ -134,7 +140,7 @@ for i, f in enumerate(feature_names):
         cols = st.columns(5)
 st.markdown("</div>", unsafe_allow_html=True)
 
-# ---------------- Predict & Result card ----------------
+# ---------------- Predict & Result ----------------
 if predict_clicked:
     try:
         X_new = pd.DataFrame([vals], columns=feature_names)
@@ -159,13 +165,8 @@ if predict_clicked:
             st.metric("Probability", f"{proba:.3f}")
         with r3:
             st.markdown(f"<span class='badge {bcls}'>{btxt}</span>", unsafe_allow_html=True)
-
-        # simple progress bar
         st.progress(min(max(proba, 0.0), 1.0), text=f"Probability of {pos_name}: {proba:.3f}")
         st.markdown("</div>", unsafe_allow_html=True)
 
     except Exception as e:
         st.error(f"Prediction failed: {e}")
-
-# ---------------- Footer ----------------
-st.markdown("<hr><div class='subtle'>For research/education purposes only.</div>", unsafe_allow_html=True)
