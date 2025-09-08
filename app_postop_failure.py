@@ -87,10 +87,12 @@ def train_for_task(task_key: str):
     return pipe, list(X.columns), defaults
 
 # ---------------- Header ----------------
+
 st.markdown(
-    "<div class='hero'><h1>🫁 Perioperative Respiratory Failure & Mortality — Prediction</h1>"
-    "<span class='subtle'>Single-page, cloud-trained Random Forest</span></div>", unsafe_allow_html=True
+    "<div class='hero'><h1>🫁 Postoperative Respiratory Failure and Pulmonary Embolism & Mortality — Prediction</h1></div>", 
+    unsafe_allow_html=True
 )
+
 
 # ---------------- Task selector (radio for compatibility) ----------------
 task = st.radio("Select task", list(DATASETS.keys()), index=0, horizontal=True)
