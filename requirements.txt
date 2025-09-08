@@ -1,8 +1,5 @@
-streamlit==1.36.0
-pandas==2.2.2
-numpy==1.26.4
-joblib==1.3.2
-pillow==10.4.0
-scikit-learn==1.4.2
-# shap 可选，如果你要显示 shap 图片、不在云端现算的话可以不装
-# shap==0.45.0
+streamlit>=1.36
+pandas>=2.2
+numpy>=2.0
+scikit-learn>=1.5.2
+joblib>=1.3
