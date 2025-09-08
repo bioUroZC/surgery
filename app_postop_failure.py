@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 
 # ---------------- Page Config ----------------
-st.set_page_config(page_title="Perioperative RF & Mortality — Prediction", layout="wide")
+st.set_page_config(page_title="Postoperative Respiratory Failure and Pulmonary Embolism & Mortality — Prediction", layout="wide")
 
 # ---------------- Styles (lightweight CSS) ----------------
 STYLES = """
