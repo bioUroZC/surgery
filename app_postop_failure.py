@@ -132,28 +132,34 @@ with c4:
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 cols = st.columns(5)
 vals = {}
+
 for i, f in enumerate(feature_names):
     col = cols[i % 5]
 
-    # ---- 自动判断小数位数 ----
-    if any(kw in f.lower() for kw in ["score", "age", "count", "bpm", "sec", "mode"]):
-        step, fmt = 1, "%.0f"
-    else:
-        step, fmt = 0.1, "%.1f"
+    # 规则：score/age/bpm/sec/mode/PLT/ventilation 等用整数；其余保留 1 位小数
+    is_int_like = any(
+        kw in f.lower() for kw in
+        ["score", "age", "bpm", "sec", "mode", "plt", "count"]
+    )
 
     with col:
         dv = float(default_vals.get(f, 0.0))
-        vals[f] = st.number_input(
-            f,
-            value=round(dv, 1) if step == 0.1 else int(dv),
-            step=step,
-            format=fmt,
-            key=f"_in_{f}"
-        )
+        if is_int_like:
+            # 整数：不要传 format；value 用 int；step=1
+            vals[f] = st.number_input(
+                f, value=int(round(dv)), step=1, key=f"_in_{f}"
+            )
+        else:
+            # 小数：一位小数；value 用 float；step=0.1
+            vals[f] = st.number_input(
+                f, value=round(dv, 1), step=0.1, format="%.1f", key=f"_in_{f}"
+            )
 
     if (i + 1) % 5 == 0 and (i + 1) < len(feature_names):
         cols = st.columns(5)
+
 st.markdown("</div>", unsafe_allow_html=True)
+
 
 
 # ---------------- Predict & Result ----------------
