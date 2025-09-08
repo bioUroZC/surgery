@@ -127,18 +127,34 @@ with c3:
 with c4:
     predict_clicked = st.button("🚀 Predict", type="primary", use_container_width=True)
 
+
 # ---------------- Inputs (5 columns per row) ----------------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 cols = st.columns(5)
 vals = {}
 for i, f in enumerate(feature_names):
     col = cols[i % 5]
+
+    # ---- 自动判断小数位数 ----
+    if any(kw in f.lower() for kw in ["score", "age", "count", "bpm", "sec", "mode"]):
+        step, fmt = 1, "%.0f"
+    else:
+        step, fmt = 0.1, "%.1f"
+
     with col:
         dv = float(default_vals.get(f, 0.0))
-        vals[f] = st.number_input(f, value=float(dv), format="%.6f", key=f"_in_{f}")
+        vals[f] = st.number_input(
+            f,
+            value=round(dv, 1) if step == 0.1 else int(dv),
+            step=step,
+            format=fmt,
+            key=f"_in_{f}"
+        )
+
     if (i + 1) % 5 == 0 and (i + 1) < len(feature_names):
         cols = st.columns(5)
 st.markdown("</div>", unsafe_allow_html=True)
+
 
 # ---------------- Predict & Result ----------------
 if predict_clicked:
