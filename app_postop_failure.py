@@ -6,14 +6,14 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 
-st.set_page_config(page_title="Postop Respiratory Failure", layout="centered")
+st.set_page_config(page_title="Postop Respiratory Failure", layout="wide")
 st.title("Postoperative Respiratory Failure — Predict")
 
 # 固定参数
 CSV_PATH   = "train_top.csv"
 TARGET_COL = "group"
 LABEL_MAP  = {"normal": 0, "rfpe": 1}
-THRESHOLD  = 0.5   # 直接固定 0.5
+THRESHOLD  = 0.5   # 固定阈值
 
 # ---------------- Load & Train ----------------
 @st.cache_resource(show_spinner=True)
@@ -40,10 +40,18 @@ except Exception as e:
 
 # ---------------- Inputs & Predict ----------------
 st.subheader("Input patient variables")
+
 vals = {}
-for f in feature_names:
-    dv = float(default_vals.get(f, 0.0))
-    vals[f] = st.number_input(f, value=float(dv), format="%.6f")
+cols = st.columns(5)  # 5 列
+
+for i, f in enumerate(feature_names):
+    col = cols[i % 5]
+    with col:
+        dv = float(default_vals.get(f, 0.0))
+        vals[f] = st.number_input(f, value=float(dv), format="%.6f")
+    # 每 5 个变量换一行
+    if (i + 1) % 5 == 0 and (i + 1) < len(feature_names):
+        cols = st.columns(5)
 
 if st.button("Predict"):
     X_new = pd.DataFrame([vals], columns=feature_names)
