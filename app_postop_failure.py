@@ -107,9 +107,10 @@ except Exception as e:
     st.error(f"Training failed: {e}")
     st.stop()
 
+
 # ---------------- Threshold presets ----------------
 st.markdown("#### Prediction")
-c1, c2, c3, c4 = st.columns([1,1,3,3])
+c1, c2, c3 = st.columns([1,3,2])
 with c1:
     preset = st.radio("Preset", ["High sensitivity", "Balanced", "High specificity"], index=1)
 with c2:
@@ -121,12 +122,7 @@ with c2:
         threshold = 0.50
     threshold = st.slider("Threshold", 0.05, 0.95, float(threshold), 0.01, label_visibility="collapsed")
 with c3:
-    if st.button("Reset to median values", use_container_width=True):
-        for f in feature_names:
-            st.session_state[f"_in_{f}"] = float(default_vals.get(f, 0.0))
-with c4:
     predict_clicked = st.button("🚀 Predict", type="primary", use_container_width=True)
-
 
 # ---------------- Inputs (5 columns per row) ----------------
 st.markdown("<div class='card'>", unsafe_allow_html=True)
